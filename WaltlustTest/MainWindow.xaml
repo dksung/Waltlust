@@ -12,19 +12,27 @@
             <Setter Property="TextWrapping" Value="NoWrap"/>
             <Setter Property="TextTrimming" Value="None"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="5,5,5,5"/>
             <Setter Property="FontStretch" Value="Condensed"/>
         </Style>
         <Style TargetType="{x:Type TextBox}">
             <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Margin" Value="5,5,5,5"/>
-            <Setter Property="Width" Value="100"/>
+            <Setter Property="Width" Value="NaN"/>
             <Setter Property="Height" Value="25"/>
         </Style>
         <Style TargetType="{x:Type ComboBox}">
             <Setter Property="MinWidth" Value="80"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="MinWidth" Value="50"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <local:EnumToBooleanParamConverter x:Key="EnumToBooleanParamConverter"/>
+        <local:EnumToVisibilityParamConverter x:Key="EnumToVisibilityParamConverter"/>
     </Window.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -32,19 +40,97 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Vertical">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="VAN"/>
-                <ComboBox ItemsSource="{Binding VanList}"
-                          SelectedValue="{Binding SelectedVan, Mode=OneWayToSource}" 
-                          SelectedIndex="0">
-                </ComboBox>
-                <Button Content="실행" Width="50" Margin="20,0"
-                        Command="{Binding ApprovalCommand}"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="URL : "/>
+                <TextBox   Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding ServerUrl, UpdateSourceTrigger=PropertyChanged}" Width="NaN"/>
+                <Button    Grid.Column="3" Margin="2" Content="적용" Command="{Binding ModifySettingCommand}" HorizontalContentAlignment="Center"/>
+            </Grid>        
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="매장코드"/>
+                <TextBox   Grid.Column="1" Text="{Binding ShopCode, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Grid.Column="2" Text="사용자 정보"/>
+                <TextBox   Grid.Column="3" Text="{Binding UserPhoneNumber, UpdateSourceTrigger=PropertyChanged}"/>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                <Button Content="Log삭제" Width="50" Margin="20,0"
-                        Command="{Binding LogClearCommand}"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,5">
+                <TextBlock Grid.Column="0" Text="적립 포인트/스탬프"/>
+                <TextBlock Grid.Column="1" Text="0"/>
+                <TextBlock Grid.Column="2" Text="누적 포인트/스탬프"/>
+                <TextBlock Grid.Column="3" Text="1"/>
+            </Grid>
+            <Grid Visibility="{Binding Service.Type, Converter={StaticResource EnumToVisibilityParamConverter}, ConverterParameter=Stamp}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="쿠폰"/>
+                <TextBlock Grid.Column="1" Text="0"/>
+                <TextBlock Grid.Column="2" Text="쿠폰 선택"/>
+                <ComboBox  Grid.Column="3" ItemsSource="{Binding VanList}" SelectedValue="{Binding SelectedVan, Mode=OneWayToSource}" SelectedIndex="0">
+                </ComboBox>
+            </Grid>
+            <Grid Visibility="{Binding Service.Type, Converter={StaticResource EnumToVisibilityParamConverter}, ConverterParameter=Stamp}" Height="30">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Margin="2" Grid.Column="0" Content="스탬프 적립" Command="{Binding SaveStampCommand}"/>
+                <Button Margin="2" Grid.Column="1" Content="스탬프 적립 취소" Command="{Binding SaveStampCancelCommand}"/>
+                <Button Margin="2" Grid.Column="2" Content="쿠폰 사용" Command="{Binding UseCouponCommand}"/>
+                <Button Margin="2" Grid.Column="3" Content="쿠폰 사용 취소" Command="{Binding UseCouponCancelCommand}"/>
+            </Grid>
+
+            <Grid Visibility="{Binding Service.Type, Converter={StaticResource EnumToVisibilityParamConverter}, ConverterParameter=Point}" Height="30">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Margin="2" Grid.Column="0" Content="포인트 적립" Command="{Binding SavePointCommand}"/>
+                <Button Margin="2" Grid.Column="1" Content="포인트 적립 취소" Command="{Binding SavePointCancelCommand}"/>
+                <Button Margin="2" Grid.Column="2" Content="포인트 사용" Command="{Binding UsePointCommand}"/>
+                <Button Margin="2" Grid.Column="3" Content="포인트 사용 취소" Command="{Binding UsePointCancelCommand}"/>
+            </Grid>
+
+            <Grid Height="30">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Margin="2" Grid.Column="0" Content="사용자 조회" Command="{Binding GetUserInfoCommand}"/>
+                <Button Margin="2" Grid.Column="1" Content="매장 조회" Command="{Binding GetShopInfoCommand}"/>
+            </Grid>
+
+            <!--<StackPanel Orientation="Horizontal" Margin="0,5">
                 <StackPanel Orientation="Horizontal">
                     <RadioButton Content="승인" IsChecked="{Binding IsApproval}" Margin="5"/>
                     <RadioButton Content="취소" IsChecked="{Binding IsCancel}" Margin="5"/>
@@ -86,7 +172,7 @@
                 <TextBox Text="{Binding KakaoId}"/>
                 <TextBlock Text="거래고유번호" Margin="10,0,0,0"/>
                 <TextBox Text="{Binding OrgUniqueNo}"/>
-            </StackPanel>            
+            </StackPanel>-->
         </StackPanel>
         <ListView Grid.Row="1" ItemsSource="{Binding LogList}">
             <ListView.ContextMenu>

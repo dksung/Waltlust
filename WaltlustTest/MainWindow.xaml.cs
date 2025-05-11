@@ -21,17 +21,5 @@ namespace WaltlustTest
             InitializeComponent();
             DataContext = vm;
         }
-
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            var listView = sender as System.Windows.Controls.ListView;
-            if (listView == null)
-                return;
-
-            if(listView.SelectedItem is string item)
-            {
-                System.Windows.Clipboard.SetText(item);
-            }
-        }
     }
 }
