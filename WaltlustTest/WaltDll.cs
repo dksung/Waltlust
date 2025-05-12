@@ -17,7 +17,7 @@ namespace WaltlustTest
             public int product_cnt;// 상품 수
         };
 
-        public const string PathModule = @"D:\Proejct\C#\Waltlust\WaltlustTest\WaldDll.dll";
+        public const string PathModule = @"WaldDll.dll";
 
         [DllImport(PathModule, EntryPoint = "SetTitleURL", CharSet = CharSet.Unicode)]
         public static extern void SetTitleURL(string title);

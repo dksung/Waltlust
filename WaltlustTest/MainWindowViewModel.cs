@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Windows.Data;
@@ -33,6 +34,16 @@ public partial class MainWindowViewModel : ObservableObject
 
     private ConfigSettings ConfigSetting { get; set; }
 
+    [ObservableProperty]
+    private uint _CouponCount;
+
+    public ObservableCollection<string> CouponList { get; set; } = new ObservableCollection<string>();
+
+    [ObservableProperty]
+    private string _SelectedCoupon = string.Empty;
+
+    public ObservableCollection<string> LogList { get; set; } = new ObservableCollection<string>();
+
 
     [ObservableProperty]
     private WaldService _Service;
@@ -45,16 +56,23 @@ public partial class MainWindowViewModel : ObservableObject
         LoadConfiguration();
 
         Service = new WaldService(ServerUrl, ShopCode, UserPhoneNumber);
+        CouponCount = (uint)Service.exist_coupon_queue.Count;
+        CouponList = [.. Service.exist_coupon_queue];
     }
 
     private void LoadConfiguration()
     {
-        // Load configuration logic can go here if needed
-        var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-        ConfigSetting = config?.Get<ConfigSettings>();
-        ServerUrl = ConfigSetting?.ServerUrl;
-        ShopCode = ConfigSetting?.ShopCode;
-        UserPhoneNumber = ConfigSetting?.UserPhoneNumber;
+        try
+        {
+            var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            ConfigSetting = config.Get<ConfigSettings>();
+            ServerUrl = ConfigSetting?.ServerUrl;
+            ShopCode = ConfigSetting?.ShopCode;
+            UserPhoneNumber = ConfigSetting?.UserPhoneNumber;
+        }
+        catch (Exception)
+        {
+        }
     }
 
     [RelayCommand]
@@ -68,29 +86,41 @@ public partial class MainWindowViewModel : ObservableObject
     private void SaveStamp()
     {
         Service.SaveStamp();
+        LogList.Add(Service.console_log);
     }
 
     [RelayCommand]
     private void SaveStampCancel()
     {
         Service.CancelStamp();
+        LogList.Add(Service.console_log);
     }
 
     [RelayCommand]
     private void UseCoupon()
     {
         Service.UseCoupon();
+        LogList.Add(Service.console_log);
     }
 
     [RelayCommand]
     private void UseCouponCancel()
     {
         Service.CancelCoupon();
+        LogList.Add(Service.console_log);
+    }
+
+    [RelayCommand]
+    private void GetCouponInfo()
+    {
+        Service.GetCouponInfo(SelectedCoupon);
+        LogList.Add(Service.console_log);
     }
 
     [RelayCommand]
     private void SavePoint()
     {
+        LogList.Add(Service.console_log);
         Service.SavePoint();
     }
 
@@ -98,36 +128,35 @@ public partial class MainWindowViewModel : ObservableObject
     private void SavePointCancel()
     {
         Service.CancelPoint();
+        LogList.Add(Service.console_log);
     }
 
     [RelayCommand]
     private void UsePoint()
     {
         Service.UsePoint();
+        LogList.Add(Service.console_log);
     }
 
     [RelayCommand]
     private void UsePointCancel()
     {
         Service.CancelUsePoint();
+        LogList.Add(Service.console_log);
     }
 
     [RelayCommand]
     private void GetUserInfo()
     {
         Service.GetUserData();
+        LogList.Add(Service.console_log);
     }
 
     [RelayCommand]
     private void GetShopInfo()
     {
         Service.GetStoreData();
-    }
-
-    // enum값을 bool값으로 변경하는 함수를 만들어줘 IValueConverter를 사용해서
-    public bool Convert(ShopType value)
-    {
-        return value == ShopType.Stamp;
+        LogList.Add(Service.console_log);
     }
 }
 

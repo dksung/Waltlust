@@ -85,10 +85,10 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="쿠폰"/>
-                <TextBlock Grid.Column="1" Text="0"/>
+                <TextBlock Grid.Column="1" Text="{Binding CouponCount}"/>
                 <TextBlock Grid.Column="2" Text="쿠폰 선택"/>
-                <ComboBox  Grid.Column="3" ItemsSource="{Binding VanList}" SelectedValue="{Binding SelectedVan, Mode=OneWayToSource}" SelectedIndex="0">
-                </ComboBox>
+                <ComboBox  Grid.Column="3" ItemsSource="{Binding CouponList}" SelectedValue="{Binding SelectedCoupon, Mode=OneWayToSource}" SelectedIndex="0"/>
+
             </Grid>
             <Grid Visibility="{Binding Service.Type, Converter={StaticResource EnumToVisibilityParamConverter}, ConverterParameter=Stamp}" Height="30">
                 <Grid.ColumnDefinitions>
@@ -100,8 +100,20 @@
 
                 <Button Margin="2" Grid.Column="0" Content="스탬프 적립" Command="{Binding SaveStampCommand}"/>
                 <Button Margin="2" Grid.Column="1" Content="스탬프 적립 취소" Command="{Binding SaveStampCancelCommand}"/>
-                <Button Margin="2" Grid.Column="2" Content="쿠폰 사용" Command="{Binding UseCouponCommand}"/>
-                <Button Margin="2" Grid.Column="3" Content="쿠폰 사용 취소" Command="{Binding UseCouponCancelCommand}"/>
+                <!--<Button Margin="2" Grid.Column="2" Content="쿠폰 사용" Command="{Binding UseCouponCommand}"/>
+                <Button Margin="2" Grid.Column="3" Content="쿠폰 사용 취소" Command="{Binding UseCouponCancelCommand}"/>-->
+            </Grid>
+            <Grid Visibility="{Binding Service.Type, Converter={StaticResource EnumToVisibilityParamConverter}, ConverterParameter=Stamp}" Height="30">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Margin="2" Grid.Column="0" Content="쿠폰 조회" Command="{Binding GetCouponInfoCommand}"/>
+                <Button Margin="2" Grid.Column="1" Content="쿠폰 사용" Command="{Binding UseCouponCommand}"/>
+                <Button Margin="2" Grid.Column="2" Content="쿠폰 사용 취소" Command="{Binding UseCouponCancelCommand}"/>
             </Grid>
 
             <Grid Visibility="{Binding Service.Type, Converter={StaticResource EnumToVisibilityParamConverter}, ConverterParameter=Point}" Height="30">
