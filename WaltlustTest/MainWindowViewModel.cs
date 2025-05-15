@@ -12,37 +12,23 @@ using System.Windows.Data;
 public partial class MainWindowViewModel : ObservableObject
 {
     [ObservableProperty]
-    private string? _ServerUrl;
-    partial void OnServerUrlChanged(string? value)
-    {
-        ConfigSetting.ServerUrl = value;
-    }
-
-    [ObservableProperty]
-    private string? _ShopCode;
-    partial void OnShopCodeChanged(string? value)
-    {
-        ConfigSetting.ShopCode = value;
-    }
-
-    [ObservableProperty]
-    private string? _UserPhoneNumber;
-    partial void OnUserPhoneNumberChanged(string? value)
-    {
-        ConfigSetting.UserPhoneNumber = value;
-    }
-
-    private ConfigSettings ConfigSetting { get; set; }
+    public ConfigSettings _ConfigSetting;
 
     [ObservableProperty]
     private uint _CouponCount;
 
-    public ObservableCollection<string> CouponList { get; set; } = new ObservableCollection<string>();
+    [ObservableProperty]
+    public ObservableCollection<string> _CouponList = new ObservableCollection<string>();
 
     [ObservableProperty]
     private string _SelectedCoupon = string.Empty;
 
     public ObservableCollection<string> LogList { get; set; } = new ObservableCollection<string>();
+
+    private void NotifyPropertyChanged(string propertyName)
+    {
+        OnPropertyChanged(propertyName);
+    }
 
 
     [ObservableProperty]
@@ -55,9 +41,9 @@ public partial class MainWindowViewModel : ObservableObject
         // Constructor logic can go here if needed
         LoadConfiguration();
 
-        Service = new WaldService(ServerUrl, ShopCode, UserPhoneNumber);
-        CouponCount = (uint)Service.exist_coupon_queue.Count;
-        CouponList = [.. Service.exist_coupon_queue];
+        Service = new WaldService(ConfigSetting.ServerUrl, ConfigSetting.ShopCode, ConfigSetting.UserPhoneNumber);
+        
+        RefreshCouponList();
     }
 
     private void LoadConfiguration()
@@ -65,10 +51,7 @@ public partial class MainWindowViewModel : ObservableObject
         try
         {
             var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-            ConfigSetting = config.Get<ConfigSettings>();
-            ServerUrl = ConfigSetting?.ServerUrl;
-            ShopCode = ConfigSetting?.ShopCode;
-            UserPhoneNumber = ConfigSetting?.UserPhoneNumber;
+            ConfigSetting = config.GetRequiredSection("StoreInfo").Get<ConfigSettings>();
         }
         catch (Exception)
         {
@@ -87,6 +70,8 @@ public partial class MainWindowViewModel : ObservableObject
     {
         Service.SaveStamp();
         LogList.Add(Service.console_log);
+
+        GetUserInfo();
     }
 
     [RelayCommand]
@@ -94,13 +79,17 @@ public partial class MainWindowViewModel : ObservableObject
     {
         Service.CancelStamp();
         LogList.Add(Service.console_log);
+
+        RefreshCouponList();
     }
 
     [RelayCommand]
     private void UseCoupon()
     {
-        Service.UseCoupon();
+        Service.UseCoupon(SelectedCoupon);
         LogList.Add(Service.console_log);
+
+        RefreshCouponList();
     }
 
     [RelayCommand]
@@ -115,6 +104,8 @@ public partial class MainWindowViewModel : ObservableObject
     {
         Service.GetCouponInfo(SelectedCoupon);
         LogList.Add(Service.console_log);
+
+        RefreshCouponList();
     }
 
     [RelayCommand]
@@ -150,6 +141,8 @@ public partial class MainWindowViewModel : ObservableObject
     {
         Service.GetUserData();
         LogList.Add(Service.console_log);
+
+        RefreshCouponList();
     }
 
     [RelayCommand]
@@ -158,9 +151,42 @@ public partial class MainWindowViewModel : ObservableObject
         Service.GetStoreData();
         LogList.Add(Service.console_log);
     }
+
+    [RelayCommand]
+    private void CopyLog(object param)
+    {
+        if (param is IEnumerable<object> objects)
+        {
+            System.Windows.Clipboard.SetText(string.Join(Environment.NewLine, objects));
+        }
+    }
+
+    private void RefreshCouponList()
+    {
+        CouponCount = (uint)Service.Exist_coupon_queue.Count;
+
+        var currentSelectedCoupon = SelectedCoupon;
+        CouponList.Clear();
+        foreach (var coupon in Service.Exist_coupon_queue)
+        {
+            CouponList.Add(coupon);
+        }
+
+        if (CouponList.Count > 0)
+        {
+            if (string.IsNullOrEmpty(currentSelectedCoupon) || CouponList.Contains(currentSelectedCoupon) == false)
+            {
+                SelectedCoupon = CouponList[0];
+            }
+            else
+            {
+                SelectedCoupon = currentSelectedCoupon;
+            }
+        }
+    }
 }
 
-public class ConfigSettings
+public partial class ConfigSettings : ObservableObject
 {
     public string? ServerUrl { get; set; }
     public string? ShopCode { get; set; }

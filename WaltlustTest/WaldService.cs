@@ -1,4 +1,7 @@
-﻿namespace WaltlustTest;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
+namespace WaltlustTest;
 
 public enum ShopType
 {
@@ -6,13 +9,16 @@ public enum ShopType
     Point
 }
 
-public class WaldService
+public partial class WaldService : ObservableObject
 {
     string ServerUrl { get; set; }
     string ShopCode { get; set; }
     string UserPhoneNumber { get; set; }
 
-    public ShopType Type { get; set; }
+    public WaltServiceInfo ServiceInfo { get; set; }
+
+    [ObservableProperty]
+    public ShopType _Type;
 
 
     public string console_log = string.Empty;
@@ -25,7 +31,9 @@ public class WaldService
     public Queue<string> save_point_reward_id_queue = new Queue<string>();
     public Queue<string> use_point_id_queue = new Queue<string>();
     public Queue<string> use_coupon_id_queue = new Queue<string>();
-    public Queue<string> exist_coupon_queue = new Queue<string>();
+
+    [ObservableProperty]
+    public Queue<string> _exist_coupon_queue = new Queue<string>();
 
     public WaldService(string serverUrl, string shopCode, string userPhoneNumber)
     {
@@ -51,6 +59,8 @@ public class WaldService
             WaltDll.UsePointResultCallback = UsePointResult;
             WaltDll.CancelUsePointResultCallback = CancelUsePointResult;
             WaltDll.GetUserDataResultCallback = GetUserDataResult;
+
+            ServiceInfo = new WaltServiceInfo();
         }
         catch (Exception ex)
         {
@@ -107,14 +117,13 @@ public class WaldService
         WaltDll.CancelStamp(save_stamp_reward_id_queue.Peek(), CancelStampResult);
     }
 
-    public void UseCoupon()
+    public void UseCoupon(string couponCode)
     {
-        if (exist_coupon_queue.Count == 0)
+        if (Exist_coupon_queue.Count == 0)
         {
             console_log = "사용 가능한 쿠폰이 없습니다.";
             return;
         }
-
 
         List<WaltDll.Product> products =
         [
@@ -122,7 +131,7 @@ public class WaldService
             new () { product_code = "280004", product_name = "코코넛쿠키", product_price = 3000, product_cnt = 2},
         ];
 
-        WaltDll.UseCoupon(ShopCode, exist_coupon_queue.Peek(), products.ToArray(), products.Count, UseCouponResult);
+        WaltDll.UseCoupon(ShopCode, Exist_coupon_queue.Peek(), products.ToArray(), products.Count, UseCouponResult);
     }
 
     public void CancelCoupon()
@@ -136,7 +145,7 @@ public class WaldService
     }
     public void GetCouponInfo(string couponCode)
     {
-        if (exist_coupon_queue.Count == 0)
+        if (Exist_coupon_queue.Count == 0)
         {
             console_log = "조회 가능한 쿠폰이 없습니다.";
             return;
@@ -223,7 +232,7 @@ public class WaldService
 
         if (result == true)
         {
-            var id = exist_coupon_queue.Dequeue();
+            var id = Exist_coupon_queue.Dequeue();
             use_coupon_id_queue.Enqueue(coupon_id);
         }
     }
@@ -234,7 +243,7 @@ public class WaldService
         if (result == true)
         {
             var coupon = use_coupon_id_queue.Dequeue();
-            exist_coupon_queue.Enqueue(coupon);
+            Exist_coupon_queue.Enqueue(coupon);
         }
     }
 
@@ -286,22 +295,28 @@ public class WaldService
     }
     public void GetUserDataResult(bool result, string result_msg, int point, int stamp, string coupons)
     {
-        console_log = $"[발트] 고객 조회 응답 : {result}, {result_msg}, point : {point}, stamp : {stamp}, coupons {exist_coupon_queue.Count}개 : {coupons}";
+        console_log = $"[발트] 고객 조회 응답 : {result}, {result_msg}, point : {point}, stamp : {stamp}, coupons : {coupons}";
 
         if (result == true)
         {
             if (string.IsNullOrEmpty(coupons) == false)
             {
-                exist_coupon_queue.Clear();
-                coupons.Split(",").ToList().ForEach(coupon =>
-                {
-                    exist_coupon_queue.Enqueue(coupon);
-                });
+                Exist_coupon_queue.Clear();
+                coupons.Split(",").ToList().ForEach(Exist_coupon_queue.Enqueue);
             }
             max_use_point = point;
             current_stamp_count = stamp;
         }
 
-        userinfo_log = $"GetUserDataResult: {result}, {result_msg}, point : {point}, stamp : {stamp}, coupons {exist_coupon_queue.Count}개 : {coupons}";
+        userinfo_log = $"GetUserDataResult: {result}, {result_msg}, point : {point}, stamp : {stamp}, coupons {Exist_coupon_queue.Count}개 : {coupons}";
     }
+}
+
+public class WaltServiceInfo
+{
+    bool result { get; set; }
+    string message { get; set; }
+    int change_count { get; set; }
+    int reward_count { get; set; }
+    string current_reward_id { get; set; }
 }

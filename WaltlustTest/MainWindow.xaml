@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
         xmlns:local="clr-namespace:WaltlustTest"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel}"
@@ -48,7 +49,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Text="URL : "/>
-                <TextBox   Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding ServerUrl, UpdateSourceTrigger=PropertyChanged}" Width="NaN"/>
+                <TextBox   Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding ConfigSetting.ServerUrl}" Width="NaN"/>
                 <Button    Grid.Column="3" Margin="2" Content="적용" Command="{Binding ModifySettingCommand}" HorizontalContentAlignment="Center"/>
             </Grid>        
             <Grid>
@@ -59,9 +60,9 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Text="매장코드"/>
-                <TextBox   Grid.Column="1" Text="{Binding ShopCode, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox   Grid.Column="1" Text="{Binding ConfigSetting.ShopCode}"/>
                 <TextBlock Grid.Column="2" Text="사용자 정보"/>
-                <TextBox   Grid.Column="3" Text="{Binding UserPhoneNumber, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox   Grid.Column="3" Text="{Binding ConfigSetting.UserPhoneNumber}"/>
             </Grid>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -87,7 +88,7 @@
                 <TextBlock Grid.Column="0" Text="쿠폰"/>
                 <TextBlock Grid.Column="1" Text="{Binding CouponCount}"/>
                 <TextBlock Grid.Column="2" Text="쿠폰 선택"/>
-                <ComboBox  Grid.Column="3" ItemsSource="{Binding CouponList}" SelectedValue="{Binding SelectedCoupon, Mode=OneWayToSource}" SelectedIndex="0"/>
+                <ComboBox  Grid.Column="3" ItemsSource="{Binding CouponList}" SelectedValue="{Binding SelectedCoupon, Mode=TwoWay}" SelectedIndex="0"/>
 
             </Grid>
             <Grid Visibility="{Binding Service.Type, Converter={StaticResource EnumToVisibilityParamConverter}, ConverterParameter=Stamp}" Height="30">
@@ -141,57 +142,13 @@
                 <Button Margin="2" Grid.Column="0" Content="사용자 조회" Command="{Binding GetUserInfoCommand}"/>
                 <Button Margin="2" Grid.Column="1" Content="매장 조회" Command="{Binding GetShopInfoCommand}"/>
             </Grid>
-
-            <!--<StackPanel Orientation="Horizontal" Margin="0,5">
-                <StackPanel Orientation="Horizontal">
-                    <RadioButton Content="승인" IsChecked="{Binding IsApproval}" Margin="5"/>
-                    <RadioButton Content="취소" IsChecked="{Binding IsCancel}" Margin="5"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
-                    <RadioButton Content="신용카드" IsChecked="{Binding IsCredit}" Margin="5"/>
-                    <RadioButton Content="간편결제" IsChecked="{Binding IsEasyPay}" Margin="5"/>
-                    <RadioButton Content="현금영수증" IsChecked="{Binding IsCash, UpdateSourceTrigger=PropertyChanged }" Margin="5"/>
-                    <RadioButton Content="카카오머니 직승인" IsChecked="{Binding IsKakaoDr}" Margin="5"/>
-                </StackPanel>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,5">
-                <TextBlock Text="거래금액"/>
-                <TextBox Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBlock Text="부가세"/>
-                <TextBox Text="{Binding VatAmount}"/>
-                <TextBlock Text="비과세"/>
-                <TextBox Text="{Binding TaxFreeAmount}"/>
-                <TextBlock Text="할부"/>
-                <TextBox Text="{Binding Installment}"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,5">
-                <TextBlock Text="단말기번호"/>
-                <TextBox Text="{Binding CatId}"/>
-                <TextBlock Text="바코드"/>
-                <TextBox Text="{Binding Barcode}"/>
-                <TextBlock Text="원거래일자" />
-                <TextBox Text="{Binding OrgApprovalDate}"/>
-                <TextBlock Text="원거래승인번호"/>
-                <TextBox Text="{Binding OrgApprovalNo}"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,5">
-                <TextBlock Text="현금영수증 번호"/>
-                <TextBox Text="{Binding CashReceiptId}"/>
-                <RadioButton Content="개인" IsChecked="{Binding IsCashReceiptIndividual}" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <RadioButton Content="사업자" IsChecked="{Binding IsCashReceiptBusiness}" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <RadioButton Content="자진발급" IsChecked="{Binding IsCashReceiptSelf}" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <TextBlock Text="카카오 CID" Margin="10,0,0,0"/>
-                <TextBox Text="{Binding KakaoId}"/>
-                <TextBlock Text="거래고유번호" Margin="10,0,0,0"/>
-                <TextBox Text="{Binding OrgUniqueNo}"/>
-            </StackPanel>-->
         </StackPanel>
-        <ListView Grid.Row="1" ItemsSource="{Binding LogList}">
+        <ListView Grid.Row="1" ItemsSource="{Binding LogList, UpdateSourceTrigger=PropertyChanged}">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="복사"                                           
                               Command="{Binding CopyLogCommand}"
-                              CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                              CommandParameter="{Binding PlacementTarget.SelectedItems, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                 </ContextMenu>
             </ListView.ContextMenu>
         </ListView>
